@@ -5,7 +5,7 @@
 bool CInjector::injectByRunningSuspend(HWND targetHWnd, WCHAR pDllPath[]){  
 
 	DWORD pid,tid;  
-	tid = GetWindowThreadProcessId(targetHWnd,&pid);  
+	tid = GetWindowThreadProcessId(targetHWnd,&pid);
 	HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);  
 	HANDLE hThread = OpenThread(THREAD_ALL_ACCESS,FALSE,tid);  
 	if( hThread <= 0 ) return false;
@@ -56,6 +56,7 @@ bool CInjector::injectByRunningSuspend(HWND targetHWnd, WCHAR pDllPath[]){
 	threadContext.Eip = (DWORD)pShellcode;
 	::SetThreadContext(hThread, &threadContext);
 	::ResumeThread(hThread);
+
 	::CloseHandle(hProcess);
 	::CloseHandle(hThread);
 
@@ -74,14 +75,14 @@ bool CInjector::injectByCreateSuspend1(TCHAR exeFullPath[], TCHAR szDll[]){
 	TCHAR szCommandLine[MAX_PATH];
 	_tcscpy(szCommandLine, exeFullPath);
 
-	::CreateProcess(NULL, szCommandLine, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &si, &pi);    
-	LPVOID Param = VirtualAllocEx(pi.hProcess, NULL, MAX_PATH, MEM_COMMIT, PAGE_EXECUTE_READWRITE);    
-	WriteProcessMemory(pi.hProcess, Param, (LPVOID)szDll, _tcslen(szDll)*2+sizeof(TCHAR), NULL);    
+	::CreateProcess(NULL, szCommandLine, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &si, &pi);
+	LPVOID Param = VirtualAllocEx(pi.hProcess, NULL, MAX_PATH, MEM_COMMIT, PAGE_EXECUTE_READWRITE); 
+	WriteProcessMemory(pi.hProcess, Param, (LPVOID)szDll, _tcslen(szDll)*2+sizeof(TCHAR), NULL);
 
-	HANDLE hThread = CreateRemoteThread(pi.hProcess, NULL, NULL, (LPTHREAD_START_ROUTINE)LoadLibraryW,Param, CREATE_SUSPENDED, NULL);    
+	HANDLE hThread = CreateRemoteThread(pi.hProcess, NULL, NULL, (LPTHREAD_START_ROUTINE)LoadLibraryW,Param, CREATE_SUSPENDED, NULL);
 	ResumeThread(pi.hThread);
 
-	if (hThread){    
+	if ( NULL != hThread ){    
 		ResumeThread(hThread);    
 		WaitForSingleObject(hThread, INFINITE);
 
@@ -106,9 +107,9 @@ bool CInjector::injectByCreateSuspend2(TCHAR exeFullPath[], TCHAR szDll[]){
 	TCHAR pDllPath[MAX_PATH];
 	_tcscpy(pDllPath, szDll);
 
-	::CreateProcess(NULL, szCommandLine, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &si, &pi);    
-	LPVOID Param = VirtualAllocEx(pi.hProcess, NULL, MAX_PATH, MEM_COMMIT, PAGE_EXECUTE_READWRITE);    
-	WriteProcessMemory(pi.hProcess, Param, (LPVOID)szDll, _tcslen(szDll)*2+sizeof(TCHAR), NULL);    
+	::CreateProcess(NULL, szCommandLine, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &si, &pi);
+	LPVOID Param = VirtualAllocEx(pi.hProcess, NULL, MAX_PATH, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	WriteProcessMemory(pi.hProcess, Param, (LPVOID)szDll, _tcslen(szDll)*2+sizeof(TCHAR), NULL);
 
 	CONTEXT threadContext ={0};  
 	threadContext.ContextFlags = CONTEXT_CONTROL;  
@@ -152,11 +153,6 @@ bool CInjector::injectByCreateSuspend2(TCHAR exeFullPath[], TCHAR szDll[]){
 	threadContext.Eip = (DWORD)pShellcode;
 	::SetThreadContext(pi.hThread, &threadContext);
 	::ResumeThread(pi.hThread);
-	::CloseHandle(pi.hProcess);
-	::CloseHandle(pi.hThread);
-
-	ResumeThread(pi.hThread);    
-	WaitForSingleObject(pi.hThread, INFINITE);
 
 	isSuccess = true;
 
