@@ -12,5 +12,4 @@ public:
 private:
 	CInjector(void);
 	~CInjector(void);
-public:
 };

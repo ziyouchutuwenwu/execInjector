@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 
-#include "CInjector/Injector.h"
+#include "CInjector/CInjector.h"
 
 int _tmain(int argc, _TCHAR* argv[])
 {

@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 
-#include "Injector.h"
+#include "CInjector.h"
 
 bool CInjector::injectByRunningSuspend(HWND targetHWnd, WCHAR pDllPath[]){  
 
